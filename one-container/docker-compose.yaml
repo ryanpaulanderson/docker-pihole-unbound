@@ -6,7 +6,7 @@ volumes:
 
 services:
   pihole:
-    container_name: pihole
+    container_name: pihole-test
     image: cbcrowe/pihole-unbound:latest
     hostname: ${HOSTNAME}
     domainname: ${DOMAIN_NAME}
@@ -15,12 +15,12 @@ services:
       - 53:53/tcp
       - 53:53/udp
       - ${PIHOLE_WEBPORT:-80}:80/tcp #Allows use of different port to access pihole web interface when other docker containers use port 80
-      # - 5335:5335/tcp # Uncomment to enable unbound access on local server
+      - 5335:5335/tcp # Uncomment to enable unbound access on local server
       # - 22/tcp # Uncomment to enable SSH
     environment:
       - FTLCONF_LOCAL_IPV4=${FTLCONF_LOCAL_IPV4}
       - TZ=${TZ:-UTC}
-      - WEBPASSWORD=${WEBPASSWORD}
+      - WEBPASSWORD_FILE=/run/secrets/pihole-login
       - WEBTHEME=${WEBTHEME:-default-light}
       - REV_SERVER=${REV_SERVER:-false}
       - REV_SERVER_TARGET=${REV_SERVER_TARGET}
@@ -33,3 +33,9 @@ services:
       - etc_pihole-unbound:/etc/pihole:rw
       - etc_pihole_dnsmasq-unbound:/etc/dnsmasq.d:rw
     restart: unless-stopped
+    secrets:
+      - pihole-login
+
+secrets:
+  pihole-login:
+    file: .pihole-login.txt
